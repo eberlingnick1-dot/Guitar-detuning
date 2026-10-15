@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18212b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Guitar Detuning Calculator</title>
+<style>
+:root{color-scheme:dark;--bg:#10161d;--panel:#1a232d;--panel2:#222e3a;--text:#f3f6f9;--muted:#a9b6c4;--line:#344352;--accent:#82d8c2;--warn:#ffd18a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+main{max-width:720px;margin:0 auto;padding:20px 0 36px}h1{font-size:1.65rem;line-height:1.15;margin:4px 0 8px}h2{font-size:1.1rem;margin:0 0 12px}p{margin:7px 0;color:var(--muted)}.intro{margin-bottom:20px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}.fieldlabel{display:block;font-weight:650;margin:12px 0 6px}input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:12px;background:var(--panel2);color:var(--text);width:100%;min-height:46px}input:focus,select:focus,button:focus{outline:2px solid var(--accent);outline-offset:2px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}button{cursor:pointer;font-weight:650}button.primary{background:var(--accent);color:#10201c;border-color:var(--accent)}button.secondary{background:transparent}.results{display:grid;gap:8px}.stringrow{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:10px;padding:11px;background:var(--panel2);border-radius:12px}.num{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;font-weight:750}.mainresult{font-weight:700}.sub{font-size:.84rem;color:var(--muted)}.change{font-weight:750;text-align:right}.down{color:#82d8c2}.up{color:#ffd18a}.same{color:#c4d0db}.error{color:#ffadad;margin-top:10px;min-height:1.4em}.small{font-size:.85rem}.reference{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.refitem{background:var(--panel2);border-radius:10px;padding:9px 2px;text-align:center}.refitem b{display:block;font-size:1.05rem}.refitem span{font-size:.73rem;color:var(--muted)}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.8rem;color:var(--muted)}footer{font-size:.82rem;color:var(--muted);margin-top:18px}
+@media(max-width:420px){.panel{padding:13px}.row{grid-template-columns:1fr}.reference{grid-template-columns:repeat(3,1fr)}.stringrow{grid-template-columns:40px 1fr auto;gap:8px}.change{font-size:.9rem}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="pill">Works offline · No account needed</span>
+    <h1>Guitar Detuning Calculator</h1>
+    <p class="intro">Compare your current tuning with a target tuning. Enter notes from the thickest string (6) to the thinnest string (1).</p>
+  </header>
+  <section class="panel" aria-labelledby="calcTitle">
+    <h2 id="calcTitle">Your tunings</h2>
+    <label class="fieldlabel" for="current">Current tuning</label>
+    <input id="current" value="E A D G B E" autocapitalize="characters" spellcheck="false" aria-describedby="currentHelp">
+    <p id="currentHelp" class="small">Standard tuning: E A D G B E. You can type spaces or compact notes such as EADGBE.</p>
+    <label class="fieldlabel" for="target">Desired tuning</label>
+    <input id="target" value="D A D G A D" autocapitalize="characters" spellcheck="false" aria-describedby="targetHelp">
+    <p id="targetHelp" class="small">Examples: DADGAD, DADF#AD, CGCGCE. Use # for sharp or b for flat, e.g. F#.</p>
+    <div class="actions">
+      <button class="primary" id="calculate">Calculate adjustments</button>
+      <button class="secondary" id="reset">Reset to standard</button>
+    </div>
+    <div id="error" class="error" role="status" aria-live="polite"></div>
+  </section>
+  <section class="panel" aria-labelledby="resultsTitle">
+    <h2 id="resultsTitle">String-by-string adjustments</h2>
+    <p class="small">Changes use the nearest pitch with the same note name, within ±6 semitones. Add octave numbers if you need to specify an exact register (e.g. E2 A2 D3 G3 B3 E4).</p>
+    <div id="results" class="results" aria-live="polite"></div>
+    <p id="summary" class="small"></p>
+  </section>
+  <section class="panel">
+    <h2>Standard tuning reference</h2>
+    <div class="reference">
+      <div class="refitem"><span>String 6 · thickest</span><b>E2</b><span>82.4 Hz</span></div>
+      <div class="refitem"><span>String 5</span><b>A2</b><span>110.0 Hz</span></div>
+      <div class="refitem"><span>String 4</span><b>D3</b><span>146.8 Hz</span></div>
+      <div class="refitem"><span>String 3</span><b>G3</b><span>196.0 Hz</span></div>
+      <div class="refitem"><span>String 2</span><b>B3</b><span>246.9 Hz</span></div>
+      <div class="refitem"><span>String 1 · thinnest</span><b>E4</b><span>329.6 Hz</span></div>
+    </div>
+    <p class="small">One semitone = 100 cents. A positive adjustment means tighten/raise pitch; a negative adjustment means loosen/lower pitch. If you are unsure, use a tuner and change tension gradually.</p>
+  </section>
+  <footer>Tip: For the clearest result, include octave numbers in both fields. Without octave numbers, the calculator assumes the closest pitch movement. This tool calculates note changes; it does not listen to your guitar.</footer>
+</main>
+<script>
+(function(){
+ const natural={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+ function tokenize(s){
+   s=s.trim();
+   if(!s) return [];
+   const spaced=s.split(/[\s,;]+/).filter(Boolean);
+   if(spaced.length>1) return spaced;
+   // Compact notation supports accidentals, including sharps/flats: DADF#AD
+   const out=[]; const re=/([A-Ga-g])([#b]?)(-?\d+)?/g; let m, last=0;
+   while((m=re.exec(s))!==null){if(m.index!==last)return [];out.push(m[1]+m[2]+(m[3]??''));last=re.lastIndex;}
+   return last===s.length?out:[];
+ }
+ function parseNote(token){
+   const m=token.match(/^([A-Ga-g])([#b]?)(-?\d+)?$/); if(!m)return null;
+   let n=natural[m[1].toUpperCase()];
+   if(m[2]==='#')n++; if(m[2]==='b')n--;
+   const hasOct=m[3]!==undefined; const octave=hasOct?Number(m[3]):null;
+   const midi=hasOct?(octave+1)*12+n:null;
+   return {name:m[1].toUpperCase()+m[2],octave,midi,hasOct,pc:((n%12)+12)%12,token};
+ }
+ function parseTuning(s){
+   const toks=tokenize(s); if(toks.length!==6)return {error:'Enter exactly six notes, from string 6 (thickest) to string 1 (thinnest).'};
+   const notes=toks.map(parseNote); if(notes.some(n=>!n))return {error:'One or more notes are invalid. Use notes like E A D G B E or D A D G A D; add # or b if needed.'};
+   return {notes};
+ }
+ function signedDiff(a,b){
+   if(a.hasOct&&b.hasOct)return b.midi-a.midi;
+   let d=((b.pc-a.pc+6)%12+12)%12-6;
+   // Preserve exact octave note as no change if note classes match.
+   return d;
+ }
+ function fmt(n){return (n>0?'+':'')+n;}
+ function render(){
+   const a=parseTuning(document.getElementById('current').value);
+   const b=parseTuning(document.getElementById('target').value);
+   const error=document.getElementById('error'), results=document.getElementById('results'), summary=document.getElementById('summary');
+   if(a.error||b.error){error.textContent=a.error||b.error;results.innerHTML='';summary.textContent='';return;}
+   error.textContent='';
+   let changes=0, html='';
+   for(let i=0;i<6;i++){
+     const from=a.notes[i],to=b.notes[i];
+     let diff=signedDiff(from,to);
+     // When only note names are entered, use the nearest pitch movement.
+     let label=diff===0?'No change':Math.abs(diff)+' semitone'+(Math.abs(diff)===1?'':'s')+(diff<0?' down':' up');
+     let cents=diff*100;
+     if(diff!==0)changes++;
+     let cls=diff===0?'same':diff<0?'down':'up';
+     let fromName=from.name+(from.hasOct?from.octave:'');
+     let toName=to.name+(to.hasOct?to.octave:'');
+     let centsText=diff===0?'0 cents':fmt(cents)+' cents';
+     html+=`<div class="stringrow"><div class="num">${6-i}</div><div><div class="mainresult">${fromName} → ${toName}</div><div class="sub">String ${6-i} · ${centsText}</div></div><div class="change ${cls}">${label}</div></div>`;
+   }
+   results.innerHTML=html;
+   summary.textContent=changes===0?'All strings already match the target tuning.':changes+' of 6 strings need adjustment.';
+ }
+ document.getElementById('calculate').addEventListener('click',render);
+ document.getElementById('reset').addEventListener('click',()=>{
+   document.getElementById('current').value='E A D G B E';
+   document.getElementById('target').value='E A D G B E';
+   render();
+ });
+ document.getElementById('current').addEventListener('keydown',e=>{if(e.key==='Enter')render()});
+ document.getElementById('target').addEventListener('keydown',e=>{if(e.key==='Enter')render()});
+ render();
+ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+})();
+</script>
+</body>
+</html>
